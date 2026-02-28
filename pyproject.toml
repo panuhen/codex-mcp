@@ -1,0 +1,15 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "codex-mcp"
+version = "0.1.0"
+description = "MCP server that exposes Codex CLI as tools for Claude Code"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.0.0",
+]
+
+[project.scripts]
+codex-mcp = "codex_mcp.server:main"
