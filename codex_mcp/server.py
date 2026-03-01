@@ -1,7 +1,9 @@
 """MCP server that exposes Codex CLI as tools for Claude Code."""
 
+import argparse
 import asyncio
 import json
+import os
 import shutil
 
 from mcp.server.fastmcp import FastMCP
@@ -12,6 +14,10 @@ mcp = FastMCP(
     "codex",
     instructions="Run Codex CLI headlessly — code review, security audits, brainstorming, and more.",
 )
+
+# Server-wide defaults, set via CLI args or env vars in main().
+_default_profile: str = ""
+_default_config_overrides: list[str] = []
 
 
 def _find_codex() -> str:
@@ -29,11 +35,22 @@ async def _run_codex(
     *,
     cwd: str | None = None,
     timeout: int = TIMEOUT_SECONDS,
+    profile: str = "",
 ) -> dict:
     """Run codex with the given args, parse JSONL output, return structured result."""
     codex = _find_codex()
+
+    # Build top-level flags (before the subcommand).
+    prefix: list[str] = []
+    effective_profile = profile or _default_profile
+    if effective_profile:
+        prefix.extend(["-p", effective_profile])
+    for override in _default_config_overrides:
+        prefix.extend(["-c", override])
+
     proc = await asyncio.create_subprocess_exec(
         codex,
+        *prefix,
         *args,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -366,6 +383,26 @@ async def codex_resume(
 
 def main():
     """Entry point for the codex-mcp server."""
+    global _default_profile, _default_config_overrides
+
+    parser = argparse.ArgumentParser(description="Codex MCP server")
+    parser.add_argument(
+        "-p", "--profile",
+        default=os.environ.get("CODEX_PROFILE", ""),
+        help="Default Codex config profile (e.g. 'azure'). "
+             "Can also be set via CODEX_PROFILE env var.",
+    )
+    parser.add_argument(
+        "-c", "--config",
+        action="append",
+        default=[],
+        help="Codex config override (key=value), passed as -c to codex. Repeatable.",
+    )
+    args = parser.parse_args()
+
+    _default_profile = args.profile
+    _default_config_overrides = args.config
+
     mcp.run(transport="stdio")
 
 

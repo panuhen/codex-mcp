@@ -44,6 +44,39 @@ Add to your Claude Code MCP settings (`~/.mcp.json` or project-level `.mcp.json`
 
 Replace `/absolute/path/to/codex-mcp` with the actual path where you cloned the repo.
 
+### Using a Codex profile (e.g. Azure OpenAI)
+
+If you have a profile configured in `~/.codex/config.toml` (e.g. an `azure` profile with a custom model provider), pass `--profile` via `args` and supply the required API key via `env`:
+
+```json
+{
+  "mcpServers": {
+    "codex": {
+      "command": "/absolute/path/to/codex-mcp/.venv/bin/codex-mcp",
+      "args": ["--profile", "azure"],
+      "env": {
+        "AZURE_OPENAI_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
+```
+
+You can also set the profile via the `CODEX_PROFILE` environment variable instead of `args`.
+
+Additional codex config overrides can be passed with `-c`:
+
+```json
+{
+  "mcpServers": {
+    "codex": {
+      "command": "/absolute/path/to/codex-mcp/.venv/bin/codex-mcp",
+      "args": ["--profile", "azure", "-c", "model=\"o3\""]
+    }
+  }
+}
+```
+
 Restart Claude Code and the Codex tools will be available.
 
 ## Usage examples
