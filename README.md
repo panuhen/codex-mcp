@@ -62,6 +62,19 @@ If you have a profile configured in `~/.codex/config.toml` (e.g. an `azure` prof
 }
 ```
 
+If the API key is already exported in your shell profile (e.g. `export AZURE_OPENAI_API_KEY=...` in `~/.bashrc`), you can skip the `env` block entirely:
+
+```json
+{
+  "mcpServers": {
+    "codex": {
+      "command": "/absolute/path/to/codex-mcp/.venv/bin/codex-mcp",
+      "args": ["--profile", "azure"]
+    }
+  }
+}
+```
+
 You can also set the profile via the `CODEX_PROFILE` environment variable instead of `args`.
 
 Additional codex config overrides can be passed with `-c`:
